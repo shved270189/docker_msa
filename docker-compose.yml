@@ -1,0 +1,44 @@
+version: '2'
+services:
+  core:
+    build: ./core
+    command: bundle exec rails s -p 3000 -b '0.0.0.0'
+    tty: true
+    stdin_open: true
+    volumes:
+      - ./core:/app
+    volumes_from:
+      - core_box
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mysql_db
+      - logs
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpass
+  logs:
+    build: ./logs
+    command: bundle exec ruby server.rb -o '0.0.0.0'
+    tty: true
+    stdin_open: true
+    volumes:
+      - ./logs:/app
+    volumes_from:
+      - logs_box
+
+  mysql_db:
+    image: mysql:5.6
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpass
+
+
+
+
+  logs_box:
+    image: busybox
+    volumes:
+      - /bundle
+  core_box:
+    image: busybox
+    volumes:
+      - /bundle
